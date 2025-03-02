@@ -10,8 +10,6 @@ class Doctor extends Authenticatable
 {
     use HasFactory, HasApiTokens;
 
-    protected $table = 'doctors';
-    protected $primaryKey = 'id_doctor';
 
     protected $fillable = [
         'name',
