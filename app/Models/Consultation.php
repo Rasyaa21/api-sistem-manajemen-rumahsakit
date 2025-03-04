@@ -18,11 +18,11 @@ class Consultation extends Model
 
     public function doctor()
     {
-        return $this->belongsTo(Doctor::class, 'id_doctor');
+        return $this->belongsTo(Doctor::class);
     }
 
     public function patient()
     {
-        return $this->belongsTo(Patient::class, 'id_patient');
+        return $this->belongsTo(Patient::class);
     }
 }

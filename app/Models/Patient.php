@@ -10,8 +10,6 @@ class Patient extends Authenticatable
 {
     use HasFactory, HasApiTokens;
 
-
-
     protected $fillable = [
         'name',
         'birth_date',
@@ -28,6 +26,6 @@ class Patient extends Authenticatable
 
     public function consultations()
     {
-        return $this->hasMany(Consultation::class, 'id_patient');
+        return $this->hasMany(Consultation::class);
     }
 }

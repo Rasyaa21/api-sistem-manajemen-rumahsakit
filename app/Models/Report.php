@@ -18,6 +18,6 @@ class Report extends Model
 
     public function doctor()
     {
-        return $this->belongsTo(Doctor::class, 'id_doctor');
+        return $this->belongsTo(Doctor::class);
     }
 }

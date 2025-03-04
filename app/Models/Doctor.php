@@ -10,7 +10,6 @@ class Doctor extends Authenticatable
 {
     use HasFactory, HasApiTokens;
 
-
     protected $fillable = [
         'name',
         'specialization',
@@ -27,11 +26,11 @@ class Doctor extends Authenticatable
 
     public function consultations()
     {
-        return $this->hasMany(Consultation::class, 'id_doctor');
+        return $this->hasMany(Consultation::class);
     }
 
     public function reports()
     {
-        return $this->hasMany(Report::class, 'id_doctor');
+        return $this->hasMany(Report::class);
     }
 }
