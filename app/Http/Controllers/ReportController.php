@@ -19,12 +19,20 @@ class ReportController extends Controller
     public function makeReport(){
         try{
             $doctorId = Auth::user()->id;
+
+            $existingReport = Report::where('id_doctor', $doctorId)
+                ->whereDate('report_date', Carbon::today())
+                ->first();
+
+            if ($existingReport) {
+                throw new Exception("Report for today already exists");
+            }
+
             $patientCount = Consultation::where('id_doctor', $doctorId)
                 ->whereDate('consultation_date', Carbon::today())->count();
             $doctor = Doctor::findOrFail($doctorId);
             Log::info($doctor);
             $income = $patientCount * $doctor->consultation_fee;
-
 
             $report = Report::create([
                 'id_doctor'    => $doctorId,

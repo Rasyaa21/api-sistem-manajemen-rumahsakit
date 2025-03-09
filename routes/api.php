@@ -24,7 +24,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::prefix('doctor')->group(function () {
+        Route::prefix('doctor')->middleware('doctor_or_patient:doctor')->group(function () {
             Route::post('/logout', [DoctorController::class, 'logout']);
             Route::get('/me', [DoctorController::class, 'currentUser']);
             Route::put('/profile', [DoctorController::class, 'updateProfile']);
@@ -32,17 +32,17 @@ Route::prefix('v1')->group(function () {
             Route::get('/consultations', [ConsultationController::class, 'getConsultationBasedByDoctorId']);
             Route::get('/records', [MedicalRecordController::class, 'index']);
             Route::post('/records', [MedicalRecordController::class, 'store']);
-            Route::get("report", [ReportController::class, 'makeReport']);
-            Route::get("reports", [ReportController::class, 'index']);
+            Route::get('/report', [ReportController::class, 'makeReport']);
+            Route::get('/reports', [ReportController::class, 'index']);
         });
 
-        Route::prefix('patient')->group(function () {
+        Route::prefix('patient')->middleware('doctor_or_patient:patient')->group(function () {
             Route::post('/logout', [PatientController::class, 'logout']);
             Route::get('/me', [PatientController::class, 'currentUser']);
             Route::put('/profile', [PatientController::class, 'completeProfile']);
 
-            Route::get("/doctor", [ConsultationController::class, 'index']);
-            Route::post("/consultation", [ConsultationController::class, "store"]);
+            Route::get('/doctor', [ConsultationController::class, 'index']);
+            Route::post('/consultation', [ConsultationController::class, 'store']);
         });
     });
 });
