@@ -18,6 +18,6 @@ class MedicalRecord extends Model
 
     public function consultation()
     {
-        return $this->belongsTo(Consultation::class);
+        return $this->belongsTo(Consultation::class, 'id_consultation');
     }
 }

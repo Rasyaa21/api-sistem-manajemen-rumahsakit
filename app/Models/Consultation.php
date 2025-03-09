@@ -25,4 +25,9 @@ class Consultation extends Model
     {
         return $this->belongsTo(Patient::class);
     }
+
+    public function medicalRecords()
+    {
+        return $this->hasMany(MedicalRecord::class);
+    }
 }

@@ -3,79 +3,113 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\PatientResource;
+use App\Http\Resources\ResponseHelper;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Exception;
 
 class PatientController extends Controller
 {
     public function register(Request $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|string|email|unique:patients',
-            'password' => 'required|string|min:8',
-        ]);
+        try {
+            $validated = $request->validate([
+                "name" => "required|string",
+                'email' => 'required|string|email|unique:patients',
+                'password' => 'required|string|min:8',
+            ]);
 
-        $patient = Patient::create([
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+            $patient = Patient::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
 
-        $token = $patient->createToken('auth_token')->plainTextToken;
+            $token = $patient->createToken('patient_token')->plainTextToken;
 
-        return response()->json([
-            'patient' => new PatientResource($patient),
-            'token' => $token,
-        ], 201);
+            return ResponseHelper::success([
+                'patient' => new PatientResource($patient),
+                'token' => $token,
+            ], 'Registration successful', 201);
+        } catch (Exception $e) {
+            return ResponseHelper::error('Registration failed', 500, $e->getMessage());
+        }
     }
 
     public function login(Request $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
+        try {
+            $validated = $request->validate([
+                'email' => 'required|string|email',
+                'password' => 'required|string',
+            ]);
 
-        $patient = Patient::where('email', $validated['email'])->first();
+            $patient = Patient::where('email', $validated['email'])->first();
 
-        if (!$patient || !Hash::check($validated['password'], $patient->password)) {
-            return response()->json(['error' => 'wrong password'], 200);
+            if (!$patient || !Hash::check($validated['password'], $patient->password)) {
+                return ResponseHelper::error('Wrong password', 401);
+            }
+
+            $token = $patient->createToken('patient_token')->plainTextToken;
+
+            return ResponseHelper::success([
+                'patient' => new PatientResource($patient),
+                'token' => $token,
+            ], 'Login successful');
+        } catch (Exception $e) {
+            return ResponseHelper::error('Login failed', 500, $e->getMessage());
         }
-
-        $token = $patient->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'patient' => new PatientResource($patient),
-            'token' => $token,
-        ], 200);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
-        return response()->json(['message' => 'Logged out successfully'], 200);
+        try {
+            $request->user()->tokens()->delete();
+            return ResponseHelper::success(null, 'Logged out successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error('Logout failed', 500, $e->getMessage());
+        }
     }
 
     public function completeProfile(Request $request)
     {
-        $patient = Auth::user();
+        try {
+            $patient = Patient::find(Auth::user()->id);
 
-        $validated = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'birth_date' => 'nullable|date',
-            'address' => 'nullable|string|max:500',
-            'phone_number' => 'nullable|string|max:15',
-            'medical_history' => 'nullable|string',
-        ]);
+            if (!$patient) {
+                return ResponseHelper::error('Unauthorized', 401);
+            }
 
-        $patient->update($validated);
+            $validated = $request->validate([
+                'name' => 'nullable|string|max:255',
+                'birth_date' => 'nullable|date',
+                'address' => 'nullable|string|max:500',
+                'phone_number' => 'nullable|string|max:15',
+                'medical_history' => 'nullable|string',
+            ]);
 
-        return response()->json(new PatientResource($patient), 200);
+            $patient->update($validated);
+
+            return ResponseHelper::success(new PatientResource($patient), 'Profile updated successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error('Profile update failed', 500, $e->getMessage());
+        }
     }
 
     public function currentUser()
     {
-        return response()->json(new PatientResource(Auth::user()), 200);
+        try {
+            $patient = Auth::user();
+
+            if (!$patient) {
+                return ResponseHelper::error('Unauthorized', 401);
+            }
+
+            return ResponseHelper::success(new PatientResource($patient), 'User data retrieved successfully');
+        } catch (Exception $e) {
+            return ResponseHelper::error('Failed to fetch user data', 500, $e->getMessage());
+        }
     }
 }

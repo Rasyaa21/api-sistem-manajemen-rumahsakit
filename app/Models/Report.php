@@ -20,4 +20,8 @@ class Report extends Model
     {
         return $this->belongsTo(Doctor::class);
     }
+
+    protected $casts = [
+        'report_date' => 'date'
+    ];
 }

@@ -11,13 +11,13 @@ class Patient extends Authenticatable
     use HasFactory, HasApiTokens;
 
     protected $fillable = [
+        'email',
+        'password',
         'name',
         'birth_date',
         'address',
         'phone_number',
         'medical_history',
-        'email',
-        'password',
     ];
 
     protected $hidden = [
