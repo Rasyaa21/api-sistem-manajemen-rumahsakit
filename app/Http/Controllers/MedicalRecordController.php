@@ -9,10 +9,40 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\MedicalRecord;
 use Exception;
-use GuzzleHttp\Psr7\Response;
 
+/**
+ * @group Medical Records
+ *
+ * APIs for managing medical records associated with consultations.
+ */
 class MedicalRecordController extends Controller
 {
+    /**
+     * Get all medical records created by the authenticated doctor.
+     *
+     * @authenticated
+     *
+     * @response 200 {
+     *   "message": "success retreive medical record",
+     *   "data": {
+     *     "MedicalRecord": [
+     *       {
+     *         "id": 1,
+     *         "id_consultation": 12,
+     *         "diagnosis": "Flu",
+     *         "treatment": "Rest and hydration",
+     *         "examination_date": "2025-04-30"
+     *       }
+     *     ]
+     *   }
+     * }
+     * @response 500 {
+     *   "message": "failed to retreive medical record",
+     *   "error": "Internal Server Error"
+     * }
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(){
         try{
             $records = MedicalRecord::whereHas('consultation', function($query) {
@@ -24,6 +54,46 @@ class MedicalRecordController extends Controller
         }
     }
 
+    /**
+     * Store a new medical record.
+     *
+     * @authenticated
+     *
+     * @bodyParam id_consultation integer required The ID of the consultation. Example: 12
+     * @bodyParam diagnosis string required The diagnosis for the patient. Example: Flu
+     * @bodyParam treatment string required The treatment given to the patient. Example: Rest and drink fluids
+     * @bodyParam examination_date date required The date of examination. Example: 2025-04-30
+     *
+     * @response 201 {
+     *   "message": "success created medical record",
+     *   "data": {
+     *     "MedicalRecord": {
+     *       "id": 1,
+     *       "id_consultation": 12,
+     *       "diagnosis": "Flu",
+     *       "treatment": "Rest and drink fluids",
+     *       "examination_date": "2025-04-30"
+     *     }
+     *   }
+     * }
+     * @response 403 {
+     *   "message": "unauthorized"
+     * }
+     * @response 422 {
+     *   "message": "The given data was invalid.",
+     *   "errors": {
+     *     "id_consultation": ["The id_consultation field is required."],
+     *     ...
+     *   }
+     * }
+     * @response 500 {
+     *   "message": "failed to make medical record",
+     *   "error": "Internal Server Error"
+     * }
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request){
         try{
             $validated = $request->validate([
