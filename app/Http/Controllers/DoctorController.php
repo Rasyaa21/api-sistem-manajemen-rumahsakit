@@ -9,10 +9,41 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Exception;
-use Illuminate\Support\Facades\Log;
 
+/**
+ * @group Doctor Authentication & Profile
+ *
+ * APIs for doctor registration, login, logout, and profile management.
+ */
 class DoctorController extends Controller
 {
+    /**
+     * Register a new doctor.
+     *
+     * @bodyParam name string required The doctor's name. Example: Dr. John Doe
+     * @bodyParam email string required The doctor's email. Example: johndoe@example.com
+     * @bodyParam password string required Password with at least 8 characters. Example: secret123
+     *
+     * @response 201 {
+     *   "message": "Registration successful",
+     *   "data": {
+     *     "doctor": {
+     *       "id": 1,
+     *       "name": "Dr. John Doe",
+     *       "email": "johndoe@example.com"
+     *     },
+     *     "token": "eyJ0eXAiOiJKV1QiLC..."
+     *   }
+     * }
+     * @response 422 {
+     *   "message": "The given data was invalid.",
+     *   "errors": {
+     *     "email": ["The email has already been taken."]
+     *   }
+     * }
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function register(Request $request)
     {
         try {
@@ -39,6 +70,29 @@ class DoctorController extends Controller
         }
     }
 
+    /**
+     * Login a doctor and return token.
+     *
+     * @bodyParam email string required The doctor's email. Example: johndoe@example.com
+     * @bodyParam password string required The doctor's password. Example: secret123
+     *
+     * @response 200 {
+     *   "message": "Login successful",
+     *   "data": {
+     *     "doctor": {
+     *       "id": 1,
+     *       "name": "Dr. John Doe",
+     *       "email": "johndoe@example.com"
+     *     },
+     *     "token": "eyJ0eXAiOiJKV1QiLC..."
+     *   }
+     * }
+     * @response 401 {
+     *   "message": "Wrong password"
+     * }
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function login(Request $request)
     {
         try {
@@ -64,6 +118,20 @@ class DoctorController extends Controller
         }
     }
 
+    /**
+     * Logout the authenticated doctor.
+     *
+     * @authenticated
+     *
+     * @response 200 {
+     *   "message": "Logged out successfully"
+     * }
+     * @response 500 {
+     *   "message": "Logout failed"
+     * }
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function logout(Request $request)
     {
         try {
@@ -74,6 +142,31 @@ class DoctorController extends Controller
         }
     }
 
+    /**
+     * Update doctor's profile.
+     *
+     * @authenticated
+     *
+     * @bodyParam password string Optional. New password (min 8 characters). Example: newpassword123
+     * @bodyParam specialization string Optional. Doctor's specialization. Example: Cardiologist
+     * @bodyParam phone_number string Optional. Phone number (max 15 characters). Example: 08123456789
+     * @bodyParam practice_schedule string Optional. Example: Monday - Friday 08:00 - 16:00
+     * @bodyParam consultation_fee number Optional. Example: 150000
+     *
+     * @response 200 {
+     *   "message": "Profile updated successfully",
+     *   "data": {
+     *     "id": 1,
+     *     "name": "Dr. John Doe",
+     *     ...
+     *   }
+     * }
+     * @response 401 {
+     *   "message": "Unauthorized"
+     * }
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateProfile(Request $request)
     {
         try {
@@ -99,6 +192,25 @@ class DoctorController extends Controller
         }
     }
 
+    /**
+     * Get current authenticated doctor data.
+     *
+     * @authenticated
+     *
+     * @response 200 {
+     *   "message": "User data retrieved successfully",
+     *   "data": {
+     *     "id": 1,
+     *     "name": "Dr. John Doe",
+     *     "email": "johndoe@example.com"
+     *   }
+     * }
+     * @response 401 {
+     *   "message": "Unauthorized"
+     * }
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function currentUser()
     {
         try {
