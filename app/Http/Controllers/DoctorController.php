@@ -9,40 +9,67 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Exception;
+use OpenApi\Annotations as OA;
 
 /**
- * @group Doctor Authentication & Profile
- *
- * APIs for doctor registration, login, logout, and profile management.
+ * @OA\Tag(
+ *     name="Doctor",
+ *     description="API Endpoints for Doctor Management"
+ * )
  */
 class DoctorController extends Controller
 {
     /**
-     * Register a new doctor.
-     *
-     * @bodyParam name string required The doctor's name. Example: Dr. John Doe
-     * @bodyParam email string required The doctor's email. Example: johndoe@example.com
-     * @bodyParam password string required Password with at least 8 characters. Example: secret123
-     *
-     * @response 201 {
-     *   "message": "Registration successful",
-     *   "data": {
-     *     "doctor": {
-     *       "id": 1,
-     *       "name": "Dr. John Doe",
-     *       "email": "johndoe@example.com"
-     *     },
-     *     "token": "eyJ0eXAiOiJKV1QiLC..."
-     *   }
-     * }
-     * @response 422 {
-     *   "message": "The given data was invalid.",
-     *   "errors": {
-     *     "email": ["The email has already been taken."]
-     *   }
-     * }
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/auth/doctor/register",
+     *     operationId="doctorRegister",
+     *     tags={"Doctor"},
+     *     summary="Register a new doctor",
+     *     description="Register a new doctor and return token",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Doctor registration data",
+     *         @OA\JsonContent(
+     *             required={"name", "email", "password"},
+     *             @OA\Property(property="name", type="string", example="Dr. John Smith"),
+     *             @OA\Property(property="email", type="string", format="email", example="dr.smith@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Registration successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Registration successful"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="doctor", type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Dr. John Smith"),
+     *                     @OA\Property(property="email", type="string", format="email", example="dr.smith@example.com")
+     *                 ),
+     *                 @OA\Property(property="token", type="string", example="2|laravel_sanctum_token")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(property="errors", type="object", example={"email": {"The email has already been taken."}})
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Registration failed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Registration failed"),
+     *             @OA\Property(property="error", type="string", example="Error message details")
+     *         )
+     *     )
+     * )
      */
     public function register(Request $request)
     {
@@ -71,27 +98,56 @@ class DoctorController extends Controller
     }
 
     /**
-     * Login a doctor and return token.
-     *
-     * @bodyParam email string required The doctor's email. Example: johndoe@example.com
-     * @bodyParam password string required The doctor's password. Example: secret123
-     *
-     * @response 200 {
-     *   "message": "Login successful",
-     *   "data": {
-     *     "doctor": {
-     *       "id": 1,
-     *       "name": "Dr. John Doe",
-     *       "email": "johndoe@example.com"
-     *     },
-     *     "token": "eyJ0eXAiOiJKV1QiLC..."
-     *   }
-     * }
-     * @response 401 {
-     *   "message": "Wrong password"
-     * }
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/auth/doctor/login",
+     *     operationId="doctorLogin",
+     *     tags={"Doctor"},
+     *     summary="Log in as a doctor",
+     *     description="Login with email and password and receive authentication token",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Doctor login credentials",
+     *         @OA\JsonContent(
+     *             required={"email", "password"},
+     *             @OA\Property(property="email", type="string", format="email", example="dr.smith@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Login successful"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="doctor", type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Dr. John Smith"),
+     *                     @OA\Property(property="email", type="string", format="email", example="dr.smith@example.com")
+     *                 ),
+     *                 @OA\Property(property="token", type="string", example="2|laravel_sanctum_token")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Wrong credentials",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Wrong password"),
+     *             @OA\Property(property="error", type="string", example="Unauthorized")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Login failed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Login failed"),
+     *             @OA\Property(property="error", type="string", example="Error message details")
+     *         )
+     *     )
+     * )
      */
     public function login(Request $request)
     {
@@ -119,18 +175,39 @@ class DoctorController extends Controller
     }
 
     /**
-     * Logout the authenticated doctor.
-     *
-     * @authenticated
-     *
-     * @response 200 {
-     *   "message": "Logged out successfully"
-     * }
-     * @response 500 {
-     *   "message": "Logout failed"
-     * }
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/doctor/logout",
+     *     operationId="doctorLogout",
+     *     tags={"Doctor"},
+     *     summary="Log out a doctor",
+     *     description="Revoke the current authentication token",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Logout successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Logged out successfully"),
+     *             @OA\Property(property="data", type="null", example=null)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Logout failed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Logout failed"),
+     *             @OA\Property(property="error", type="string", example="Error message details")
+     *         )
+     *     )
+     * )
      */
     public function logout(Request $request)
     {
@@ -143,29 +220,60 @@ class DoctorController extends Controller
     }
 
     /**
-     * Update doctor's profile.
-     *
-     * @authenticated
-     *
-     * @bodyParam password string Optional. New password (min 8 characters). Example: newpassword123
-     * @bodyParam specialization string Optional. Doctor's specialization. Example: Cardiologist
-     * @bodyParam phone_number string Optional. Phone number (max 15 characters). Example: 08123456789
-     * @bodyParam practice_schedule string Optional. Example: Monday - Friday 08:00 - 16:00
-     * @bodyParam consultation_fee number Optional. Example: 150000
-     *
-     * @response 200 {
-     *   "message": "Profile updated successfully",
-     *   "data": {
-     *     "id": 1,
-     *     "name": "Dr. John Doe",
-     *     ...
-     *   }
-     * }
-     * @response 401 {
-     *   "message": "Unauthorized"
-     * }
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Put(
+     *     path="/doctor/profile",
+     *     operationId="updateDoctorProfile",
+     *     tags={"Doctor"},
+     *     summary="Update doctor profile information",
+     *     description="Update authenticated doctor's profile information",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=false,
+     *         description="Doctor profile data",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="password", type="string", format="password", example="newpassword123"),
+     *             @OA\Property(property="specialization", type="string", example="Cardiologist"),
+     *             @OA\Property(property="phone_number", type="string", example="+1234567890"),
+     *             @OA\Property(property="practice_schedule", type="string", example="Monday - Friday 08:00 - 16:00"),
+     *             @OA\Property(property="consultation_fee", type="number", example=150000)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profile updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Profile updated successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Dr. John Smith"),
+     *                 @OA\Property(property="email", type="string", format="email", example="dr.smith@example.com"),
+     *                 @OA\Property(property="specialization", type="string", example="Cardiologist"),
+     *                 @OA\Property(property="phone_number", type="string", example="+1234567890"),
+     *                 @OA\Property(property="practice_schedule", type="string", example="Monday - Friday 08:00 - 16:00"),
+     *                 @OA\Property(property="consultation_fee", type="number", example=150000)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthorized"),
+     *             @OA\Property(property="error", type="string", example="Unauthorized")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Profile update failed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Profile update failed"),
+     *             @OA\Property(property="error", type="string", example="Error message details")
+     *         )
+     *     )
+     * )
      */
     public function updateProfile(Request $request)
     {
@@ -193,23 +301,49 @@ class DoctorController extends Controller
     }
 
     /**
-     * Get current authenticated doctor data.
-     *
-     * @authenticated
-     *
-     * @response 200 {
-     *   "message": "User data retrieved successfully",
-     *   "data": {
-     *     "id": 1,
-     *     "name": "Dr. John Doe",
-     *     "email": "johndoe@example.com"
-     *   }
-     * }
-     * @response 401 {
-     *   "message": "Unauthorized"
-     * }
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/doctor/me",
+     *     operationId="getDoctorProfile",
+     *     tags={"Doctor"},
+     *     summary="Get current doctor information",
+     *     description="Get authenticated doctor's profile information",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="User data retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="User data retrieved successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Dr. John Smith"),
+     *                 @OA\Property(property="email", type="string", format="email", example="dr.smith@example.com"),
+     *                 @OA\Property(property="specialization", type="string", example="Cardiologist"),
+     *                 @OA\Property(property="phone_number", type="string", example="+1234567890"),
+     *                 @OA\Property(property="practice_schedule", type="string", example="Monday - Friday 08:00 - 16:00"),
+     *                 @OA\Property(property="consultation_fee", type="number", example=150000)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthorized"),
+     *             @OA\Property(property="error", type="string", example="Unauthorized")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Failed to fetch user data",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Failed to fetch user data"),
+     *             @OA\Property(property="error", type="string", example="Error message details")
+     *         )
+     *     )
+     * )
      */
     public function currentUser()
     {

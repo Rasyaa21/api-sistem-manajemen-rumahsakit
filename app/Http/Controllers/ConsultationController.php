@@ -11,32 +11,60 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
+use OpenApi\Annotations as OA;
+
 /**
- * @OA\Info(
- *     version="1.0.0",
- *     title="Consultation API",
- *     description="API untuk konsultasi antara pasien dan dokter"
- * )
- *
  * @OA\Tag(
  *     name="Consultations",
- *     description="API untuk mengelola konsultasi"
+ *     description="API Endpoints for managing consultations between patients and doctors"
  * )
  */
 class ConsultationController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/api/consultations",
+     *     path="/patient/doctor",
+     *     operationId="getAllDoctors",
      *     tags={"Consultations"},
-     *     summary="Mendapatkan semua data dokter",
+     *     summary="Get all available doctors",
+     *     description="Retrieves a list of all doctors for patients to select from",
+     *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
-     *         description="Berhasil mendapatkan data dokter"
+     *         description="Doctors data retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Doctor data retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Dr. John Smith"),
+     *                     @OA\Property(property="email", type="string", example="dr.smith@example.com"),
+     *                     @OA\Property(property="specialization", type="string", example="Cardiologist"),
+     *                     @OA\Property(property="phone_number", type="string", example="+1234567890"),
+     *                     @OA\Property(property="practice_schedule", type="string", example="Monday - Friday 08:00 - 16:00"),
+     *                     @OA\Property(property="consultation_fee", type="number", example=50)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=500,
-     *         description="Gagal mendapatkan data dokter"
+     *         description="Failed to retrieve doctors",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Failed to retrieved doctor"),
+     *             @OA\Property(property="error", type="string", example="Error message details")
+     *         )
      *     )
      * )
      */
@@ -51,9 +79,12 @@ class ConsultationController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/consultations",
+     *     path="/patient/consultation",
+     *     operationId="createConsultation",
      *     tags={"Consultations"},
-     *     summary="Membuat konsultasi baru",
+     *     summary="Book a new consultation",
+     *     description="Creates a new consultation booking with a specified doctor",
+     *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -65,15 +96,46 @@ class ConsultationController extends Controller
      *     ),
      *     @OA\Response(
      *         response=201,
-     *         description="Berhasil membuat konsultasi"
+     *         description="Consultation created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Success create consultation"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="consultation", type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="id_doctor", type="integer", example=1),
+     *                     @OA\Property(property="id_patient", type="integer", example=2),
+     *                     @OA\Property(property="consultation_date", type="string", format="date", example="2025-06-01"),
+     *                     @OA\Property(property="consultation_time", type="string", format="time", example="09:30"),
+     *                     @OA\Property(property="doctor", type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="name", type="string", example="Dr. John Smith")
+     *                     ),
+     *                     @OA\Property(property="patient", type="object",
+     *                         @OA\Property(property="id", type="integer", example=2),
+     *                         @OA\Property(property="name", type="string", example="Jane Doe")
+     *                     )
+     *                 )
+     *             )
+     *         )
      *     ),
      *     @OA\Response(
      *         response=422,
-     *         description="Dokter tidak tersedia pada waktu ini"
+     *         description="Doctor is not available at this time slot",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Doctor is not available at this time slot"),
+     *             @OA\Property(property="error", type="string", example="Doctor is not available at this time slot")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=500,
-     *         description="Gagal membuat konsultasi"
+     *         description="Failed to create consultation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="failed to make consultation"),
+     *             @OA\Property(property="error", type="string", example="Error message details")
+     *         )
      *     )
      * )
      */
@@ -115,16 +177,54 @@ class ConsultationController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/consultations/doctor",
+     *     path="/doctor/consultations",
+     *     operationId="getDoctorConsultations",
      *     tags={"Consultations"},
-     *     summary="Mendapatkan konsultasi berdasarkan ID dokter (yang login)",
+     *     summary="Get all consultations for authenticated doctor",
+     *     description="Retrieves all consultations assigned to the currently authenticated doctor",
+     *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
-     *         description="Berhasil mendapatkan data konsultasi"
+     *         description="Consultations retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Success get consultation"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="consultation", type="array",
+     *                     @OA\Items(
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="id_doctor", type="integer", example=1),
+     *                         @OA\Property(property="id_patient", type="integer", example=2),
+     *                         @OA\Property(property="consultation_date", type="string", format="date", example="2025-06-01"),
+     *                         @OA\Property(property="consultation_time", type="string", format="time", example="09:30"),
+     *                         @OA\Property(property="doctor", type="object",
+     *                             @OA\Property(property="id", type="integer", example=1),
+     *                             @OA\Property(property="name", type="string", example="Dr. John Smith")
+     *                         ),
+     *                         @OA\Property(property="patient", type="object",
+     *                             @OA\Property(property="id", type="integer", example=2),
+     *                             @OA\Property(property="name", type="string", example="Jane Doe")
+     *                         )
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=500,
-     *         description="Gagal mendapatkan data konsultasi"
+     *         description="Failed to retrieve consultations",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Failed to retrieve consultation data"),
+     *             @OA\Property(property="error", type="string", example="Error message details")
+     *         )
      *     )
      * )
      */

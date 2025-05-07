@@ -22,8 +22,10 @@ class PatientController extends Controller
     /**
      * @OA\Post(
      *     path="/auth/patient/register",
-     *     summary="Register a new patient",
+     *     operationId="patientRegister",
      *     tags={"Patient"},
+     *     summary="Register a new patient",
+     *     description="Register a new patient and return token",
      *     @OA\RequestBody(
      *         required=true,
      *         description="Patient registration data",
@@ -48,6 +50,14 @@ class PatientController extends Controller
      *                 ),
      *                 @OA\Property(property="token", type="string", example="2|laravel_sanctum_token")
      *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(property="errors", type="object", example={"email": {"The email has already been taken."}})
      *         )
      *     ),
      *     @OA\Response(
@@ -90,8 +100,10 @@ class PatientController extends Controller
     /**
      * @OA\Post(
      *     path="/auth/patient/login",
-     *     summary="Log in a patient",
+     *     operationId="patientLogin",
      *     tags={"Patient"},
+     *     summary="Log in as a patient",
+     *     description="Login with email and password and receive authentication token",
      *     @OA\RequestBody(
      *         required=true,
      *         description="Patient login credentials",
@@ -165,8 +177,10 @@ class PatientController extends Controller
     /**
      * @OA\Post(
      *     path="/patient/logout",
-     *     summary="Log out a patient",
+     *     operationId="patientLogout",
      *     tags={"Patient"},
+     *     summary="Log out a patient",
+     *     description="Revoke the current authentication token",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
@@ -175,6 +189,13 @@ class PatientController extends Controller
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Logged out successfully"),
      *             @OA\Property(property="data", type="null", example=null)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
      *         )
      *     ),
      *     @OA\Response(
@@ -201,8 +222,10 @@ class PatientController extends Controller
     /**
      * @OA\Put(
      *     path="/patient/profile",
-     *     summary="Update patient profile information",
+     *     operationId="updatePatientProfile",
      *     tags={"Patient"},
+     *     summary="Update patient profile",
+     *     description="Update authenticated patient's profile information",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -280,8 +303,10 @@ class PatientController extends Controller
     /**
      * @OA\Get(
      *     path="/patient/me",
-     *     summary="Get current patient information",
+     *     operationId="getPatientProfile",
      *     tags={"Patient"},
+     *     summary="Get current patient profile",
+     *     description="Get authenticated patient's profile information",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,

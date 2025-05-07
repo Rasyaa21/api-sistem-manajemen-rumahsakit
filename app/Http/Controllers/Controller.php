@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use OpenApi\Attributes as OA;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
 
 /**
  * @OA\Info(
  *     title="Hospital Management API",
  *     version="1.0.0",
  *     description="API for Hospital Management System",
- *     @OA\Contact(
- *         email="admin@hospital.com",
- *         name="API Support"
- *     ),
  *     @OA\License(
  *         name="Apache 2.0",
  *         url="http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -31,8 +29,7 @@ use OpenApi\Attributes as OA;
  *     securityScheme="bearerAuth"
  * )
  */
-
-abstract class Controller
+class Controller
 {
-    //
+
 }
