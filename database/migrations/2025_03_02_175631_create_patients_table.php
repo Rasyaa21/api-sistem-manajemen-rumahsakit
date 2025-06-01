@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->date('birth_date')->nullable();
-            $table->text('address')->nullable();
-            $table->string('phone_number')->nullable();
-            $table->text('medical_history')->nullable();
-            $table->string('email')->unique();
-            $table->string('password');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('national_id')->unique(); // NIK in Indonesian
+            $table->date('birth_date');
+            $table->enum('gender', ['male', 'female']);
+            $table->text('address');
+            $table->enum('blood_type', ['A', 'B', 'AB', 'O', 'A+', 'B+', 'AB+', 'O+', 'A-', 'B-', 'AB-', 'O-'])->nullable();
             $table->timestamps();
         });
     }

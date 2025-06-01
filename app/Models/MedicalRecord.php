@@ -10,14 +10,40 @@ class MedicalRecord extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id_consultation',
+        'registration_id',
         'diagnosis',
         'treatment',
-        'examination_date',
+        'additional_notes',
+        'input_date',
     ];
 
-    public function consultation()
+    protected $casts = [
+        'input_date' => 'datetime',
+    ];
+
+    /**
+     * Get the registration for this medical record
+     */
+    public function registration()
     {
-        return $this->belongsTo(Consultation::class, 'id_consultation');
+        return $this->belongsTo(Registration::class);
+    }
+
+    /**
+     * Get the medical record medicines for this medical record
+     */
+    public function medicalRecordMedicines()
+    {
+        return $this->hasMany(MedicalRecordMedicine::class);
+    }
+
+    /**
+     * Get the medicines for this medical record
+     */
+    public function medicines()
+    {
+        return $this->belongsToMany(Medicine::class, 'medical_record_medicines')
+                    ->withPivot('quantity', 'usage_instructions')
+                    ->withTimestamps();
     }
 }

@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('doctors', function (Blueprint $table) {
+        Schema::create('medical_record_medicines', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('license_number'); // no_STR in Indonesian
-            $table->string('specialization');
-            $table->text('practice_schedule');
-            $table->decimal('consultation_fee', 10, 2)->default(0);
+            $table->foreignId('medical_record_id')->constrained()->onDelete('cascade');
+            $table->foreignId('medicine_id')->constrained()->onDelete('cascade');
+            $table->integer('quantity');
+            $table->text('usage_instructions'); // instruksi_penggunaan
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('doctors');
+        Schema::dropIfExists('medical_record_medicines');
     }
 };

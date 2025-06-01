@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\DoctorOrPatientMiddleware;
 use App\Http\Middleware\ForceJsonResponse;
 use Illuminate\Foundation\Application;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'force_json' => ForceJsonResponse::class,
             'doctor_or_patient' => DoctorOrPatientMiddleware::class,
+            'admin' => AdminMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

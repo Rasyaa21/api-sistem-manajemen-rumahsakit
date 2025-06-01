@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('consultations', function (Blueprint $table) {
+        Schema::create('medicines', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_doctor')->constrained('doctors')->onDelete('cascade');
-            $table->foreignId('id_patient')->constrained('patients')->onDelete('cascade');
-            $table->date('consultation_date');
-            $table->time('consultation_time');
+            $table->string('medicine_name');
+            $table->enum('medicine_type', ['tablet', 'capsule', 'syrup', 'injection', 'cream', 'drops']);
+            $table->string('dosage');
+            $table->string('unit');
+            $table->integer('stock');
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('consultations');
+        Schema::dropIfExists('medicines');
     }
 };

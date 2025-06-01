@@ -3,34 +3,45 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Model;
 
-class Doctor extends Authenticatable
+class Doctor extends Model
 {
-    use HasFactory, HasApiTokens;
+    use HasFactory;
 
     protected $fillable = [
-        'name',
+        'user_id',
+        'license_number',
         'specialization',
-        'phone_number',
         'practice_schedule',
         'consultation_fee',
-        'email',
-        'password',
     ];
 
-    protected $hidden = [
-        'password',
+    protected $casts = [
+        'consultation_fee' => 'decimal:2',
     ];
 
-    public function consultations()
+    /**
+     * Get the user that owns the doctor profile
+     */
+    public function user()
     {
-        return $this->hasMany(Consultation::class);
+        return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the registrations for this doctor
+     */
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class);
+    }
+
+    /**
+     * Get the reports for this doctor
+     */
     public function reports()
     {
-        return $this->hasMany(Report::class);
+        return $this->hasMany(Report::class, 'doctor_id');
     }
 }

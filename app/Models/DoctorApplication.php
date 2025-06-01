@@ -5,36 +5,32 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Patient extends Model
+class DoctorApplication extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
+        'full_name',
         'national_id',
-        'birth_date',
-        'gender',
-        'address',
-        'blood_type',
+        'license_number',
+        'specialization',
+        'cv_url',
+        'diploma_url',
+        'application_status',
+        'admin_notes',
+        'application_date',
     ];
 
     protected $casts = [
-        'birth_date' => 'date',
+        'application_date' => 'datetime',
     ];
 
     /**
-     * Get the user that owns the patient profile
+     * Get the user that submitted this application
      */
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the registrations for this patient
-     */
-    public function registrations()
-    {
-        return $this->hasMany(Registration::class);
     }
 }
