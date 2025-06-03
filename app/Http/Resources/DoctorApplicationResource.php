@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DoctorApplicationResource extends JsonResource
+class DoctorResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,15 +17,10 @@ class DoctorApplicationResource extends JsonResource
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'full_name' => $this->full_name,
-            'national_id' => $this->national_id,
             'license_number' => $this->license_number,
             'specialization' => $this->specialization,
-            'cv_url' => $this->cv_url,
-            'diploma_url' => $this->diploma_url,
-            'application_status' => $this->application_status,
-            'admin_notes' => $this->admin_notes,
-            'processed_at' => $this->processed_at?->format('Y-m-d H:i:s'),
+            'practice_schedule' => $this->practice_schedule,
+            'consultation_fee' => (float) $this->consultation_fee,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
@@ -36,8 +31,15 @@ class DoctorApplicationResource extends JsonResource
                     'full_name' => $this->user->full_name,
                     'email' => $this->user->email,
                     'phone_number' => $this->user->phone_number,
-                    'role' => $this->user->role,
                 ];
+            }),
+
+            'registrations' => $this->whenLoaded('registrations', function () {
+                return RegistrationResource::collection($this->registrations);
+            }),
+
+            'reports' => $this->whenLoaded('reports', function () {
+                return ReportResource::collection($this->reports);
             }),
         ];
     }
