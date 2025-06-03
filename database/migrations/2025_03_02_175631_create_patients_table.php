@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('national_id')->unique(); // NIK in Indonesian
-            $table->date('birth_date');
-            $table->enum('gender', ['male', 'female']);
-            $table->text('address');
+            $table->string('national_id')->unique()->nullable(); // NIK in Indonesian
+            $table->date('birth_date')->nullable();
+            $table->enum('gender', ['male', 'female'])->nullable();
+            $table->text('address')->nullable();
             $table->enum('blood_type', ['A', 'B', 'AB', 'O', 'A+', 'B+', 'AB+', 'O+', 'A-', 'B-', 'AB-', 'O-'])->nullable();
             $table->timestamps();
         });

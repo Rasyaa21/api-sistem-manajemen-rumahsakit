@@ -15,8 +15,13 @@ use OpenApi\Annotations as OA;
 
 /**
  * @OA\Tag(
- *     name="Admin",
- *     description="API Endpoints for admin management"
+ *     name="🔐 Authentication",
+ *     description="Admin login endpoint"
+ * )
+ *
+ * @OA\Tag(
+ *     name="⚙️ Admin Management",
+ *     description="Administrative functions for managing users, doctors, and system"
  * )
  */
 class AdminController extends Controller
@@ -25,7 +30,7 @@ class AdminController extends Controller
      * @OA\Get(
      *     path="/admin/users",
      *     operationId="getAllUsers",
-     *     tags={"Admin"},
+     *     tags={"⚙️ Admin Management"},
      *     summary="Get all users",
      *     description="Retrieves all users in the system",
      *     security={{"bearerAuth":{}}},
@@ -81,7 +86,7 @@ class AdminController extends Controller
      * @OA\Put(
      *     path="/admin/users/{id}/role",
      *     operationId="updateUserRole",
-     *     tags={"Admin"},
+     *     tags={"⚙️ Admin Management"},
      *     summary="Update user role",
      *     description="Updates a user's role in the system",
      *     security={{"bearerAuth":{}}},
@@ -158,7 +163,7 @@ class AdminController extends Controller
      * @OA\Get(
      *     path="/admin/doctor-applications",
      *     operationId="getDoctorApplications",
-     *     tags={"Admin"},
+     *     tags={"⚙️ Admin Management"},
      *     summary="Get all doctor applications",
      *     description="Retrieves all doctor applications with their status",
      *     security={{"bearerAuth":{}}},
@@ -204,7 +209,7 @@ class AdminController extends Controller
      * @OA\Put(
      *     path="/admin/doctor-applications/{id}/approve",
      *     operationId="approveDoctorApplication",
-     *     tags={"Admin"},
+     *     tags={"⚙️ Admin Management"},
      *     summary="Approve doctor application",
      *     description="Approves a doctor application and creates doctor profile",
      *     security={{"bearerAuth":{}}},
@@ -285,7 +290,7 @@ class AdminController extends Controller
      * @OA\Put(
      *     path="/admin/doctor-applications/{id}/reject",
      *     operationId="rejectDoctorApplication",
-     *     tags={"Admin"},
+     *     tags={"⚙️ Admin Management"},
      *     summary="Reject doctor application",
      *     description="Rejects a doctor application with admin notes",
      *     security={{"bearerAuth":{}}},
@@ -362,7 +367,7 @@ class AdminController extends Controller
      * @OA\Delete(
      *     path="/admin/users/{id}",
      *     operationId="deleteUser",
-     *     tags={"Admin"},
+     *     tags={"⚙️ Admin Management"},
      *     summary="Delete user",
      *     description="Deletes a user from the system",
      *     security={{"bearerAuth":{}}},
@@ -407,14 +412,15 @@ class AdminController extends Controller
      * @OA\Post(
      *     path="/auth/admin/login",
      *     operationId="adminLogin",
-     *     tags={"Admin"},
+     *     tags={"🔐 Authentication"},
      *     summary="Admin login",
-     *     description="Authenticates an admin user",
+     *     description="Authenticate admin user with email and password",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
+     *             required={"email", "password"},
      *             @OA\Property(property="email", type="string", format="email", example="admin@hospital.com"),
-     *             @OA\Property(property="password", type="string", example="password123")
+     *             @OA\Property(property="password", type="string", format="password", example="password123")
      *         )
      *     ),
      *     @OA\Response(
@@ -424,13 +430,8 @@ class AdminController extends Controller
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Login successful"),
      *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="user", type="object",
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="full_name", type="string", example="Admin User"),
-     *                     @OA\Property(property="email", type="string", example="admin@hospital.com"),
-     *                     @OA\Property(property="role", type="string", example="admin")
-     *                 ),
-     *                 @OA\Property(property="token", type="string", example="1|abcdef123456...")
+     *                 @OA\Property(property="user", type="object"),
+     *                 @OA\Property(property="token", type="string", example="1|laravel_sanctum_token")
      *             )
      *         )
      *     ),
@@ -440,14 +441,6 @@ class AdminController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Invalid credentials")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Not an admin user",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Access denied. Admin role required.")
      *         )
      *     )
      * )

@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ReportResource extends JsonResource
+class UserResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,16 +16,25 @@ class ReportResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'doctor_id' => $this->doctor_id,
-            'patient_count' => $this->patient_count,
-            'income' => (float) $this->income,
-            'report_date' => $this->report_date?->format('Y-m-d'),
+            'full_name' => $this->full_name,
+            'email' => $this->email,
+            'phone_number' => $this->phone_number,
+            'role' => $this->role,
+            'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
             // Conditional relationships
+            'patient' => $this->whenLoaded('patient', function () {
+                return new PatientResource($this->patient);
+            }),
+
             'doctor' => $this->whenLoaded('doctor', function () {
                 return new DoctorResource($this->doctor);
+            }),
+
+            'doctor_applications' => $this->whenLoaded('doctorApplications', function () {
+                return DoctorApplicationResource::collection($this->doctorApplications);
             }),
         ];
     }

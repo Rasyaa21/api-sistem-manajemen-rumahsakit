@@ -16,13 +16,11 @@ class DoctorOrPatientMiddleware
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        // Periksa apakah pengguna adalah Patient atau Doctor
-        if ($role === 'doctor' && !$user instanceof \App\Models\Doctor) {
-            return response()->json(['message' => 'Access denied for non-doctor'], 403);
-        }
-
-        if ($role === 'patient' && !$user instanceof \App\Models\Patient) {
-            return response()->json(['message' => 'Access denied for non-patient'], 403);
+        // Check user role matches the required role
+        if ($user->role !== $role) {
+            return response()->json([
+                'message' => "Access denied. This endpoint requires {$role} role."
+            ], 403);
         }
 
         return $next($request);

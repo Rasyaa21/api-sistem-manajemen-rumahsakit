@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Hospital Management System API",
-        "description": "API for managing hospital operations including patients, doctors, registrations, medical records, and reports",
+        "description": "API for managing hospital operations with role-based access control",
         "contact": {
             "email": "admin@hospital.com"
         },
@@ -10,15 +10,15 @@
     },
     "servers": [
         {
-            "url": "http://my-default-host.com",
-            "description": "Hospital Management API Server"
+            "url": "http://localhost:8000/api/v1",
+            "description": "Local development server"
         }
     ],
     "paths": {
         "/admin/users": {
             "get": {
                 "tags": [
-                    "Admin"
+                    "⚙️ Admin Management"
                 ],
                 "summary": "Get all users",
                 "description": "Retrieves all users in the system",
@@ -132,7 +132,7 @@
         "/admin/users/{id}/role": {
             "put": {
                 "tags": [
-                    "Admin"
+                    "⚙️ Admin Management"
                 ],
                 "summary": "Update user role",
                 "description": "Updates a user's role in the system",
@@ -270,7 +270,7 @@
         "/admin/doctor-applications": {
             "get": {
                 "tags": [
-                    "Admin"
+                    "⚙️ Admin Management"
                 ],
                 "summary": "Get all doctor applications",
                 "description": "Retrieves all doctor applications with their status",
@@ -365,7 +365,7 @@
         "/admin/doctor-applications/{id}/approve": {
             "put": {
                 "tags": [
-                    "Admin"
+                    "⚙️ Admin Management"
                 ],
                 "summary": "Approve doctor application",
                 "description": "Approves a doctor application and creates doctor profile",
@@ -465,7 +465,7 @@
         "/admin/doctor-applications/{id}/reject": {
             "put": {
                 "tags": [
-                    "Admin"
+                    "⚙️ Admin Management"
                 ],
                 "summary": "Reject doctor application",
                 "description": "Rejects a doctor application with admin notes",
@@ -577,7 +577,7 @@
         "/admin/users/{id}": {
             "delete": {
                 "tags": [
-                    "Admin"
+                    "⚙️ Admin Management"
                 ],
                 "summary": "Delete user",
                 "description": "Deletes a user from the system",
@@ -645,16 +645,20 @@
         "/auth/admin/login": {
             "post": {
                 "tags": [
-                    "Admin"
+                    "🔐 Authentication"
                 ],
                 "summary": "Admin login",
-                "description": "Authenticates an admin user",
+                "description": "Authenticate admin user with email and password",
                 "operationId": "adminLogin",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
                                 "properties": {
                                     "email": {
                                         "type": "string",
@@ -663,6 +667,7 @@
                                     },
                                     "password": {
                                         "type": "string",
+                                        "format": "password",
                                         "example": "password123"
                                     }
                                 },
@@ -689,29 +694,11 @@
                                         "data": {
                                             "properties": {
                                                 "user": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer",
-                                                            "example": 1
-                                                        },
-                                                        "full_name": {
-                                                            "type": "string",
-                                                            "example": "Admin User"
-                                                        },
-                                                        "email": {
-                                                            "type": "string",
-                                                            "example": "admin@hospital.com"
-                                                        },
-                                                        "role": {
-                                                            "type": "string",
-                                                            "example": "admin"
-                                                        }
-                                                    },
                                                     "type": "object"
                                                 },
                                                 "token": {
                                                     "type": "string",
-                                                    "example": "1|abcdef123456..."
+                                                    "example": "1|laravel_sanctum_token"
                                                 }
                                             },
                                             "type": "object"
@@ -741,37 +728,17 @@
                                 }
                             }
                         }
-                    },
-                    "403": {
-                        "description": "Not an admin user",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Access denied. Admin role required."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
                     }
                 }
             }
         },
-        "/patient/doctor": {
+        "/patient/doctors": {
             "get": {
                 "tags": [
-                    "Consultations"
+                    "🏥 Patient Services"
                 ],
                 "summary": "Get all available doctors",
-                "description": "Retrieves a list of all doctors for patients to select from",
+                "description": "Retrieves a list of all approved doctors for patients to select from",
                 "operationId": "getAllDoctors",
                 "responses": {
                     "200": {
@@ -786,59 +753,65 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Doctor data retrieved successfully"
+                                            "example": "Doctors retrieved successfully"
                                         },
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Dr. John Smith"
-                                                    },
-                                                    "email": {
-                                                        "type": "string",
-                                                        "example": "dr.smith@example.com"
-                                                    },
-                                                    "specialization": {
-                                                        "type": "string",
-                                                        "example": "Cardiologist"
-                                                    },
-                                                    "phone_number": {
-                                                        "type": "string",
-                                                        "example": "+1234567890"
-                                                    },
-                                                    "practice_schedule": {
-                                                        "type": "string",
-                                                        "example": "Monday - Friday 08:00 - 16:00"
-                                                    },
-                                                    "consultation_fee": {
-                                                        "type": "number",
-                                                        "example": 50
+                                            "properties": {
+                                                "doctors": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "user_id": {
+                                                                "type": "integer",
+                                                                "example": 2
+                                                            },
+                                                            "license_number": {
+                                                                "type": "string",
+                                                                "example": "STR123456789"
+                                                            },
+                                                            "specialization": {
+                                                                "type": "string",
+                                                                "example": "Cardiology"
+                                                            },
+                                                            "practice_schedule": {
+                                                                "type": "string",
+                                                                "example": "Monday-Friday 08:00-17:00"
+                                                            },
+                                                            "consultation_fee": {
+                                                                "type": "number",
+                                                                "example": 150000
+                                                            },
+                                                            "user": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 2
+                                                                    },
+                                                                    "full_name": {
+                                                                        "type": "string",
+                                                                        "example": "Dr. John Smith"
+                                                                    },
+                                                                    "email": {
+                                                                        "type": "string",
+                                                                        "example": "dr.smith@example.com"
+                                                                    },
+                                                                    "phone_number": {
+                                                                        "type": "string",
+                                                                        "example": "081234567890"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -858,11 +831,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Failed to retrieved doctor"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
+                                            "example": "Failed to retrieve doctors"
                                         }
                                     },
                                     "type": "object"
@@ -878,38 +847,37 @@
                 ]
             }
         },
-        "/patient/consultation": {
+        "/patient/registration": {
             "post": {
                 "tags": [
-                    "Consultations"
+                    "🏥 Patient Services"
                 ],
-                "summary": "Book a new consultation",
-                "description": "Creates a new consultation booking with a specified doctor",
-                "operationId": "createConsultation",
+                "summary": "Register for a doctor visit",
+                "description": "Creates a new registration for a patient to visit a doctor",
+                "operationId": "createRegistration",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "id_doctor",
-                                    "consultation_date",
-                                    "consultation_time"
+                                    "doctor_id",
+                                    "visit_date",
+                                    "complaint"
                                 ],
                                 "properties": {
-                                    "id_doctor": {
+                                    "doctor_id": {
                                         "type": "integer",
                                         "example": 1
                                     },
-                                    "consultation_date": {
+                                    "visit_date": {
                                         "type": "string",
                                         "format": "date",
                                         "example": "2025-06-01"
                                     },
-                                    "consultation_time": {
+                                    "complaint": {
                                         "type": "string",
-                                        "format": "time",
-                                        "example": "09:30"
+                                        "example": "Chest pain and shortness of breath"
                                     }
                                 },
                                 "type": "object"
@@ -919,7 +887,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Consultation created successfully",
+                        "description": "Registration created successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -930,58 +898,41 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Success create consultation"
+                                            "example": "Registration created successfully"
                                         },
                                         "data": {
                                             "properties": {
-                                                "consultation": {
+                                                "registration": {
                                                     "properties": {
                                                         "id": {
                                                             "type": "integer",
                                                             "example": 1
                                                         },
-                                                        "id_doctor": {
+                                                        "patient_id": {
                                                             "type": "integer",
                                                             "example": 1
                                                         },
-                                                        "id_patient": {
+                                                        "doctor_id": {
                                                             "type": "integer",
                                                             "example": 2
                                                         },
-                                                        "consultation_date": {
+                                                        "visit_date": {
                                                             "type": "string",
                                                             "format": "date",
                                                             "example": "2025-06-01"
                                                         },
-                                                        "consultation_time": {
+                                                        "status": {
                                                             "type": "string",
-                                                            "format": "time",
-                                                            "example": "09:30"
+                                                            "example": "pending"
                                                         },
-                                                        "doctor": {
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                },
-                                                                "name": {
-                                                                    "type": "string",
-                                                                    "example": "Dr. John Smith"
-                                                                }
-                                                            },
-                                                            "type": "object"
+                                                        "complaint": {
+                                                            "type": "string",
+                                                            "example": "Chest pain and shortness of breath"
                                                         },
                                                         "patient": {
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "integer",
-                                                                    "example": 2
-                                                                },
-                                                                "name": {
-                                                                    "type": "string",
-                                                                    "example": "Jane Doe"
-                                                                }
-                                                            },
+                                                            "type": "object"
+                                                        },
+                                                        "doctor": {
                                                             "type": "object"
                                                         }
                                                     },
@@ -996,8 +947,8 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Doctor is not available at this time slot",
+                    "404": {
+                        "description": "Patient profile not completed",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1008,11 +959,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Doctor is not available at this time slot"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Doctor is not available at this time slot"
+                                            "example": "Please complete your patient profile first"
                                         }
                                     },
                                     "type": "object"
@@ -1020,8 +967,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Failed to create consultation",
+                    "422": {
+                        "description": "Validation error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1032,11 +979,10 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "failed to make consultation"
+                                            "example": "Validation failed"
                                         },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
+                                        "errors": {
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -1052,17 +998,17 @@
                 ]
             }
         },
-        "/doctor/consultations": {
+        "/doctor/registrations": {
             "get": {
                 "tags": [
-                    "Consultations"
+                    "🏥 Patient Services"
                 ],
-                "summary": "Get all consultations for authenticated doctor",
-                "description": "Retrieves all consultations assigned to the currently authenticated doctor",
-                "operationId": "getDoctorConsultations",
+                "summary": "Get all registrations for authenticated doctor",
+                "description": "Retrieves all patient registrations assigned to the currently authenticated doctor",
+                "operationId": "getDoctorRegistrations",
                 "responses": {
                     "200": {
-                        "description": "Consultations retrieved successfully",
+                        "description": "Registrations retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1073,11 +1019,11 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Success get consultation"
+                                            "example": "Registrations retrieved successfully"
                                         },
                                         "data": {
                                             "properties": {
-                                                "consultation": {
+                                                "registrations": {
                                                     "type": "array",
                                                     "items": {
                                                         "properties": {
@@ -1085,48 +1031,31 @@
                                                                 "type": "integer",
                                                                 "example": 1
                                                             },
-                                                            "id_doctor": {
+                                                            "patient_id": {
                                                                 "type": "integer",
                                                                 "example": 1
                                                             },
-                                                            "id_patient": {
+                                                            "doctor_id": {
                                                                 "type": "integer",
                                                                 "example": 2
                                                             },
-                                                            "consultation_date": {
+                                                            "visit_date": {
                                                                 "type": "string",
                                                                 "format": "date",
                                                                 "example": "2025-06-01"
                                                             },
-                                                            "consultation_time": {
+                                                            "status": {
                                                                 "type": "string",
-                                                                "format": "time",
-                                                                "example": "09:30"
+                                                                "example": "pending"
                                                             },
-                                                            "doctor": {
-                                                                "properties": {
-                                                                    "id": {
-                                                                        "type": "integer",
-                                                                        "example": 1
-                                                                    },
-                                                                    "name": {
-                                                                        "type": "string",
-                                                                        "example": "Dr. John Smith"
-                                                                    }
-                                                                },
-                                                                "type": "object"
+                                                            "complaint": {
+                                                                "type": "string",
+                                                                "example": "Chest pain"
                                                             },
                                                             "patient": {
-                                                                "properties": {
-                                                                    "id": {
-                                                                        "type": "integer",
-                                                                        "example": 2
-                                                                    },
-                                                                    "name": {
-                                                                        "type": "string",
-                                                                        "example": "Jane Doe"
-                                                                    }
-                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "doctor": {
                                                                 "type": "object"
                                                             }
                                                         },
@@ -1142,24 +1071,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to retrieve consultations",
+                    "404": {
+                        "description": "Doctor profile not found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1170,11 +1083,228 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Failed to retrieve consultation data"
+                                            "example": "Doctor profile not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/patient/registrations": {
+            "get": {
+                "tags": [
+                    "🏥 Patient Services"
+                ],
+                "summary": "Get all registrations for authenticated patient",
+                "description": "Retrieves all registrations made by the currently authenticated patient",
+                "operationId": "getPatientRegistrations",
+                "responses": {
+                    "200": {
+                        "description": "Registrations retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Error message details"
+                                            "example": "Registrations retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "registrations": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "patient_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "doctor_id": {
+                                                                "type": "integer",
+                                                                "example": 2
+                                                            },
+                                                            "visit_date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2025-06-01"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "confirmed"
+                                                            },
+                                                            "complaint": {
+                                                                "type": "string",
+                                                                "example": "Chest pain"
+                                                            },
+                                                            "patient": {
+                                                                "type": "object"
+                                                            },
+                                                            "doctor": {
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Patient profile not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Patient profile not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/doctor/registrations/{id}/status": {
+            "put": {
+                "tags": [
+                    "🏥 Patient Services"
+                ],
+                "summary": "Update registration status",
+                "description": "Updates the status of a patient registration (confirm, complete, cancel)",
+                "operationId": "updateRegistrationStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Registration ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "confirmed",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "confirmed"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Registration status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registration status updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "registration": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized to update this registration",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized to update this registration"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Registration not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registration not found"
                                         }
                                     },
                                     "type": "object"
@@ -1193,24 +1323,27 @@
         "/auth/doctor/register": {
             "post": {
                 "tags": [
-                    "Doctor"
+                    "🔐 Authentication"
                 ],
-                "summary": "Register a new doctor",
-                "description": "Register a new doctor and return token",
-                "operationId": "doctorRegister",
+                "summary": "Apply to become a doctor",
+                "description": "Submit an application to become a doctor (requires admin approval)",
+                "operationId": "doctorApplicationSubmit",
                 "requestBody": {
-                    "description": "Doctor registration data",
+                    "description": "Doctor application data",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "name",
+                                    "full_name",
                                     "email",
-                                    "password"
+                                    "password",
+                                    "national_id",
+                                    "license_number",
+                                    "specialization"
                                 ],
                                 "properties": {
-                                    "name": {
+                                    "full_name": {
                                         "type": "string",
                                         "example": "Dr. John Smith"
                                     },
@@ -1223,6 +1356,30 @@
                                         "type": "string",
                                         "format": "password",
                                         "example": "password123"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    },
+                                    "national_id": {
+                                        "type": "string",
+                                        "example": "1234567890123456"
+                                    },
+                                    "license_number": {
+                                        "type": "string",
+                                        "example": "STR123456789"
+                                    },
+                                    "specialization": {
+                                        "type": "string",
+                                        "example": "Cardiology"
+                                    },
+                                    "cv_url": {
+                                        "type": "string",
+                                        "example": "https://example.com/cv.pdf"
+                                    },
+                                    "diploma_url": {
+                                        "type": "string",
+                                        "example": "https://example.com/diploma.pdf"
                                     }
                                 },
                                 "type": "object"
@@ -1232,7 +1389,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Registration successful",
+                        "description": "Application submitted successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1243,27 +1400,15 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Registration successful"
+                                            "example": "Doctor application submitted successfully. Awaiting admin approval."
                                         },
                                         "data": {
                                             "properties": {
-                                                "doctor": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer",
-                                                            "example": 1
-                                                        },
-                                                        "name": {
-                                                            "type": "string",
-                                                            "example": "Dr. John Smith"
-                                                        },
-                                                        "email": {
-                                                            "type": "string",
-                                                            "format": "email",
-                                                            "example": "dr.smith@example.com"
-                                                        }
-                                                    },
-                                                    "type": "object"
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                },
+                                                "application": {
+                                                    "$ref": "#/components/schemas/DoctorApplicationResource"
                                                 },
                                                 "token": {
                                                     "type": "string",
@@ -1284,41 +1429,16 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The given data was invalid."
-                                        },
-                                        "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "email": [
-                                                    "The email has already been taken."
-                                                ]
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Registration failed",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
                                         "success": {
                                             "type": "boolean",
                                             "example": false
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Registration failed"
+                                            "example": "Validation failed"
                                         },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
+                                        "errors": {
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -1332,10 +1452,10 @@
         "/auth/doctor/login": {
             "post": {
                 "tags": [
-                    "Doctor"
+                    "🔐 Authentication"
                 ],
                 "summary": "Log in as a doctor",
-                "description": "Login with email and password and receive authentication token",
+                "description": "Login with email and password (only for approved doctors)",
                 "operationId": "doctorLogin",
                 "requestBody": {
                     "description": "Doctor login credentials",
@@ -1381,23 +1501,11 @@
                                         },
                                         "data": {
                                             "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                },
                                                 "doctor": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer",
-                                                            "example": 1
-                                                        },
-                                                        "name": {
-                                                            "type": "string",
-                                                            "example": "Dr. John Smith"
-                                                        },
-                                                        "email": {
-                                                            "type": "string",
-                                                            "format": "email",
-                                                            "example": "dr.smith@example.com"
-                                                        }
-                                                    },
-                                                    "type": "object"
+                                                    "$ref": "#/components/schemas/DoctorResource"
                                                 },
                                                 "token": {
                                                     "type": "string",
@@ -1413,7 +1521,7 @@
                         }
                     },
                     "401": {
-                        "description": "Wrong credentials",
+                        "description": "Wrong credentials or not approved",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1424,35 +1532,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Wrong password"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Login failed",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Login failed"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
+                                            "example": "Invalid credentials or account not approved as doctor"
                                         }
                                     },
                                     "type": "object"
@@ -1466,7 +1546,7 @@
         "/doctor/logout": {
             "post": {
                 "tags": [
-                    "Doctor"
+                    "👤 User Profile"
                 ],
                 "summary": "Log out a doctor",
                 "description": "Revoke the current authentication token",
@@ -1485,50 +1565,54 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Logged out successfully"
-                                        },
-                                        "data": {
-                                            "type": "null",
-                                            "example": null
                                         }
                                     },
                                     "type": "object"
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Logout failed",
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/doctor/me": {
+            "get": {
+                "tags": [
+                    "👤 User Profile"
+                ],
+                "summary": "Get current doctor profile",
+                "description": "Get the authenticated doctor's profile information",
+                "operationId": "getCurrentDoctor",
+                "responses": {
+                    "200": {
+                        "description": "Doctor profile retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "success": {
                                             "type": "boolean",
-                                            "example": false
+                                            "example": true
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Logout failed"
+                                            "example": "Doctor profile retrieved successfully"
                                         },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                },
+                                                "doctor": {
+                                                    "$ref": "#/components/schemas/DoctorResource"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -1547,34 +1631,32 @@
         "/doctor/profile": {
             "put": {
                 "tags": [
-                    "Doctor"
+                    "👤 User Profile"
                 ],
-                "summary": "Update doctor profile information",
-                "description": "Update authenticated doctor's profile information",
+                "summary": "Update doctor profile",
+                "description": "Update the authenticated doctor's profile information",
                 "operationId": "updateDoctorProfile",
                 "requestBody": {
-                    "description": "Doctor profile data",
                     "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "password": {
+                                    "full_name": {
                                         "type": "string",
-                                        "format": "password",
-                                        "example": "newpassword123"
-                                    },
-                                    "specialization": {
-                                        "type": "string",
-                                        "example": "Cardiologist"
+                                        "example": "Dr. John Smith"
                                     },
                                     "phone_number": {
                                         "type": "string",
-                                        "example": "+1234567890"
+                                        "example": "081234567890"
+                                    },
+                                    "specialization": {
+                                        "type": "string",
+                                        "example": "Cardiology"
                                     },
                                     "practice_schedule": {
                                         "type": "string",
-                                        "example": "Monday - Friday 08:00 - 16:00"
+                                        "example": "Monday-Friday 08:00-17:00"
                                     },
                                     "consultation_fee": {
                                         "type": "number",
@@ -1603,85 +1685,14 @@
                                         },
                                         "data": {
                                             "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
                                                 },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "Dr. John Smith"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "format": "email",
-                                                    "example": "dr.smith@example.com"
-                                                },
-                                                "specialization": {
-                                                    "type": "string",
-                                                    "example": "Cardiologist"
-                                                },
-                                                "phone_number": {
-                                                    "type": "string",
-                                                    "example": "+1234567890"
-                                                },
-                                                "practice_schedule": {
-                                                    "type": "string",
-                                                    "example": "Monday - Friday 08:00 - 16:00"
-                                                },
-                                                "consultation_fee": {
-                                                    "type": "number",
-                                                    "example": 150000
+                                                "doctor": {
+                                                    "$ref": "#/components/schemas/DoctorResource"
                                                 }
                                             },
                                             "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Profile update failed",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Profile update failed"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
                                         }
                                     },
                                     "type": "object"
@@ -1697,17 +1708,47 @@
                 ]
             }
         },
-        "/doctor/me": {
-            "get": {
+        "/upload/document": {
+            "post": {
                 "tags": [
-                    "Doctor"
+                    "📄 File Upload"
                 ],
-                "summary": "Get current doctor information",
-                "description": "Get authenticated doctor's profile information",
-                "operationId": "getDoctorProfile",
+                "summary": "Upload document (PDF)",
+                "description": "Upload PDF documents for doctor applications (CV, diploma, etc.)",
+                "operationId": "uploadDocument",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "description": "PDF file to upload (max 5MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "type": {
+                                        "description": "Type of document being uploaded",
+                                        "type": "string",
+                                        "enum": [
+                                            "cv",
+                                            "diploma",
+                                            "certificate"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "User data retrieved successfully",
+                        "description": "File uploaded successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1718,38 +1759,25 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "User data retrieved successfully"
+                                            "example": "File uploaded successfully"
                                         },
                                         "data": {
                                             "properties": {
-                                                "id": {
+                                                "file_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/documents/cv_1234567890.pdf"
+                                                },
+                                                "file_path": {
+                                                    "type": "string",
+                                                    "example": "documents/cv_1234567890.pdf"
+                                                },
+                                                "file_size": {
                                                     "type": "integer",
-                                                    "example": 1
+                                                    "example": 1024576
                                                 },
-                                                "name": {
+                                                "file_type": {
                                                     "type": "string",
-                                                    "example": "Dr. John Smith"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "format": "email",
-                                                    "example": "dr.smith@example.com"
-                                                },
-                                                "specialization": {
-                                                    "type": "string",
-                                                    "example": "Cardiologist"
-                                                },
-                                                "phone_number": {
-                                                    "type": "string",
-                                                    "example": "+1234567890"
-                                                },
-                                                "practice_schedule": {
-                                                    "type": "string",
-                                                    "example": "Monday - Friday 08:00 - 16:00"
-                                                },
-                                                "consultation_fee": {
-                                                    "type": "number",
-                                                    "example": 150000
+                                                    "example": "cv"
                                                 }
                                             },
                                             "type": "object"
@@ -1760,8 +1788,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "422": {
+                        "description": "Validation error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1772,11 +1800,10 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Unauthorized"
+                                            "example": "Validation failed"
                                         },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
+                                        "errors": {
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -1785,7 +1812,7 @@
                         }
                     },
                     "500": {
-                        "description": "Failed to fetch user data",
+                        "description": "Upload failed",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1796,11 +1823,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Failed to fetch user data"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
+                                            "example": "Failed to upload file"
                                         }
                                     },
                                     "type": "object"
@@ -1819,7 +1842,7 @@
         "/doctor/records": {
             "get": {
                 "tags": [
-                    "Medical Records"
+                    "👩‍⚕️ Doctor Services"
                 ],
                 "summary": "Get all medical records",
                 "description": "Retrieves all medical records created by the authenticated doctor",
@@ -1849,51 +1872,34 @@
                                                                 "type": "integer",
                                                                 "example": 1
                                                             },
-                                                            "id_doctor": {
+                                                            "registration_id": {
                                                                 "type": "integer",
                                                                 "example": 1
                                                             },
-                                                            "id_patient": {
-                                                                "type": "integer",
-                                                                "example": 2
-                                                            },
-                                                            "medical_condition": {
+                                                            "diagnosis": {
                                                                 "type": "string",
                                                                 "example": "Hypertension"
                                                             },
-                                                            "treatments": {
+                                                            "treatment": {
                                                                 "type": "string",
-                                                                "example": "Prescribed medication for blood pressure"
+                                                                "example": "Lifestyle modification and medication"
                                                             },
-                                                            "notes": {
+                                                            "additional_notes": {
                                                                 "type": "string",
                                                                 "example": "Patient should monitor blood pressure daily"
                                                             },
-                                                            "doctor": {
-                                                                "properties": {
-                                                                    "id": {
-                                                                        "type": "integer",
-                                                                        "example": 1
-                                                                    },
-                                                                    "name": {
-                                                                        "type": "string",
-                                                                        "example": "Dr. John Smith"
-                                                                    }
-                                                                },
+                                                            "input_date": {
+                                                                "type": "string",
+                                                                "format": "datetime"
+                                                            },
+                                                            "registration": {
                                                                 "type": "object"
                                                             },
-                                                            "patient": {
-                                                                "properties": {
-                                                                    "id": {
-                                                                        "type": "integer",
-                                                                        "example": 2
-                                                                    },
-                                                                    "name": {
-                                                                        "type": "string",
-                                                                        "example": "Jane Doe"
-                                                                    }
-                                                                },
-                                                                "type": "object"
+                                                            "medicines": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object"
+                                                                }
                                                             }
                                                         },
                                                         "type": "object"
@@ -1908,24 +1914,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to retrieve medical records",
+                    "404": {
+                        "description": "Doctor profile not found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1936,11 +1926,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Failed to retrieve medical records"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
+                                            "example": "Doctor profile not found"
                                         }
                                     },
                                     "type": "object"
@@ -1957,10 +1943,10 @@
             },
             "post": {
                 "tags": [
-                    "Medical Records"
+                    "👩‍⚕️ Doctor Services"
                 ],
                 "summary": "Create a new medical record",
-                "description": "Creates a new medical record for a patient",
+                "description": "Creates a new medical record for a patient registration with optional medicines",
                 "operationId": "createMedicalRecord",
                 "requestBody": {
                     "required": true,
@@ -1968,26 +1954,46 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "id_patient",
-                                    "medical_condition",
-                                    "treatments"
+                                    "registration_id",
+                                    "diagnosis",
+                                    "treatment"
                                 ],
                                 "properties": {
-                                    "id_patient": {
+                                    "registration_id": {
                                         "type": "integer",
-                                        "example": 2
+                                        "example": 1
                                     },
-                                    "medical_condition": {
+                                    "diagnosis": {
                                         "type": "string",
-                                        "example": "Hypertension"
+                                        "example": "Hypertension Grade 1"
                                     },
-                                    "treatments": {
+                                    "treatment": {
                                         "type": "string",
-                                        "example": "Prescribed medication for blood pressure"
+                                        "example": "Lifestyle modification and antihypertensive medication"
                                     },
-                                    "notes": {
+                                    "additional_notes": {
                                         "type": "string",
-                                        "example": "Patient should monitor blood pressure daily"
+                                        "example": "Patient should monitor blood pressure daily and return in 2 weeks"
+                                    },
+                                    "medicines": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "medicine_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "example": 30
+                                                },
+                                                "usage_instructions": {
+                                                    "type": "string",
+                                                    "example": "Take 1 tablet daily after breakfast"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -2013,58 +2019,111 @@
                                         "data": {
                                             "properties": {
                                                 "medical_record": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer",
-                                                            "example": 1
-                                                        },
-                                                        "id_doctor": {
-                                                            "type": "integer",
-                                                            "example": 1
-                                                        },
-                                                        "id_patient": {
-                                                            "type": "integer",
-                                                            "example": 2
-                                                        },
-                                                        "medical_condition": {
-                                                            "type": "string",
-                                                            "example": "Hypertension"
-                                                        },
-                                                        "treatments": {
-                                                            "type": "string",
-                                                            "example": "Prescribed medication for blood pressure"
-                                                        },
-                                                        "notes": {
-                                                            "type": "string",
-                                                            "example": "Patient should monitor blood pressure daily"
-                                                        },
-                                                        "doctor": {
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "integer",
-                                                                    "example": 1
-                                                                },
-                                                                "name": {
-                                                                    "type": "string",
-                                                                    "example": "Dr. John Smith"
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        },
-                                                        "patient": {
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "integer",
-                                                                    "example": 2
-                                                                },
-                                                                "name": {
-                                                                    "type": "string",
-                                                                    "example": "Jane Doe"
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
-                                                    },
+                                                    "type": "object"
+                                                },
+                                                "medicines": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized to create record for this registration",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized to create medical record for this registration"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or insufficient medicine stock",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/doctor/records/{id}": {
+            "get": {
+                "tags": [
+                    "👩‍⚕️ Doctor Services"
+                ],
+                "summary": "Get a specific medical record",
+                "description": "Retrieves a specific medical record with all related information",
+                "operationId": "getMedicalRecord",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Medical Record ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Medical record retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medical record retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "medical_record": {
                                                     "type": "object"
                                                 }
                                             },
@@ -2076,48 +2135,8 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The given data was invalid."
-                                        },
-                                        "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "id_patient": [
-                                                    "The id patient field is required."
-                                                ]
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to create medical record",
+                    "404": {
+                        "description": "Medical record not found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2128,11 +2147,638 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Failed to create medical record"
+                                            "example": "Medical record not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized to access this medical record",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
                                         },
-                                        "error": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Error message details"
+                                            "example": "Unauthorized to access this medical record"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/patient/medical-records": {
+            "get": {
+                "tags": [
+                    "🏥 Patient Services"
+                ],
+                "summary": "Get patient's own medical records",
+                "description": "Retrieves all medical records for the authenticated patient",
+                "operationId": "getPatientMedicalRecords",
+                "responses": {
+                    "200": {
+                        "description": "Medical records retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medical records retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "medical_records": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/MedicalRecordResource"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Patient profile not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Patient profile not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/medicines": {
+            "get": {
+                "tags": [
+                    "⚙️ Admin Management"
+                ],
+                "summary": "Get all medicines",
+                "description": "Retrieves all medicines in the hospital inventory (admin only)",
+                "operationId": "getAllMedicines",
+                "responses": {
+                    "200": {
+                        "description": "Medicines retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medicines retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "medicines": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/MedicineResource"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "⚙️ Admin Management"
+                ],
+                "summary": "Create new medicine",
+                "description": "Creates a new medicine in the inventory (admin only)",
+                "operationId": "createMedicine",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "medicine_name",
+                                    "medicine_type",
+                                    "dosage",
+                                    "unit",
+                                    "stock"
+                                ],
+                                "properties": {
+                                    "medicine_name": {
+                                        "type": "string",
+                                        "example": "Amlodipine"
+                                    },
+                                    "medicine_type": {
+                                        "type": "string",
+                                        "example": "tablet"
+                                    },
+                                    "dosage": {
+                                        "type": "string",
+                                        "example": "5mg"
+                                    },
+                                    "unit": {
+                                        "type": "string",
+                                        "example": "tablet"
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 100
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Calcium channel blocker for hypertension"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Medicine created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medicine created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "medicine": {
+                                                    "$ref": "#/components/schemas/MedicineResource"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/doctor/medicines": {
+            "get": {
+                "tags": [
+                    "👩‍⚕️ Doctor Services"
+                ],
+                "summary": "Get available medicines",
+                "description": "Retrieves all medicines with stock > 0 for doctors to prescribe",
+                "operationId": "getDoctorAvailableMedicines",
+                "responses": {
+                    "200": {
+                        "description": "Available medicines retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Available medicines retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "medicines": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/MedicineResource"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/medicines/{id}": {
+            "get": {
+                "tags": [
+                    "⚙️ Admin Management"
+                ],
+                "summary": "Get specific medicine",
+                "description": "Retrieves a specific medicine by ID (admin only)",
+                "operationId": "getMedicine",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Medicine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Medicine retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medicine retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "medicine": {
+                                                    "$ref": "#/components/schemas/MedicineResource"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Medicine not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medicine not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "⚙️ Admin Management"
+                ],
+                "summary": "Update medicine",
+                "description": "Updates a medicine information and stock (admin only)",
+                "operationId": "updateMedicine",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Medicine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "medicine_name": {
+                                        "type": "string",
+                                        "example": "Amlodipine"
+                                    },
+                                    "medicine_type": {
+                                        "type": "string",
+                                        "example": "tablet"
+                                    },
+                                    "dosage": {
+                                        "type": "string",
+                                        "example": "5mg"
+                                    },
+                                    "unit": {
+                                        "type": "string",
+                                        "example": "tablet"
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 100
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Calcium channel blocker for hypertension"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Medicine updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medicine updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "medicine": {
+                                                    "$ref": "#/components/schemas/MedicineResource"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Medicine not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medicine not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "⚙️ Admin Management"
+                ],
+                "summary": "Delete medicine",
+                "description": "Deletes a medicine from inventory (admin only)",
+                "operationId": "deleteMedicine",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Medicine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Medicine deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medicine deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Medicine not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Medicine not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Cannot delete medicine with existing prescriptions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Cannot delete medicine with existing prescriptions"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/medicines/{id}/stock": {
+            "put": {
+                "tags": [
+                    "⚙️ Admin Management"
+                ],
+                "summary": "Update medicine stock",
+                "description": "Updates medicine stock quantity (admin only)",
+                "operationId": "updateMedicineStock",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Medicine ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "stock"
+                                ],
+                                "properties": {
+                                    "stock": {
+                                        "description": "New stock quantity",
+                                        "type": "integer",
+                                        "example": 100
+                                    },
+                                    "reason": {
+                                        "description": "Reason for stock update",
+                                        "type": "string",
+                                        "example": "Stock replenishment"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Stock updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Stock updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "medicine": {
+                                                    "$ref": "#/components/schemas/MedicineResource"
+                                                },
+                                                "previous_stock": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "new_stock": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -2151,10 +2797,10 @@
         "/auth/patient/register": {
             "post": {
                 "tags": [
-                    "Patient"
+                    "🔐 Authentication"
                 ],
-                "summary": "Register a new patient",
-                "description": "Register a new patient and return token",
+                "summary": "Register as a new patient",
+                "description": "Register a new patient account and automatically create patient profile",
                 "operationId": "patientRegister",
                 "requestBody": {
                     "description": "Patient registration data",
@@ -2163,12 +2809,12 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "name",
+                                    "full_name",
                                     "email",
                                     "password"
                                 ],
                                 "properties": {
-                                    "name": {
+                                    "full_name": {
                                         "type": "string",
                                         "example": "John Doe"
                                     },
@@ -2181,6 +2827,10 @@
                                         "type": "string",
                                         "format": "password",
                                         "example": "password123"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "081234567890"
                                     }
                                 },
                                 "type": "object"
@@ -2205,23 +2855,11 @@
                                         },
                                         "data": {
                                             "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                },
                                                 "patient": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer",
-                                                            "example": 1
-                                                        },
-                                                        "name": {
-                                                            "type": "string",
-                                                            "example": "John Doe"
-                                                        },
-                                                        "email": {
-                                                            "type": "string",
-                                                            "format": "email",
-                                                            "example": "john.doe@example.com"
-                                                        }
-                                                    },
-                                                    "type": "object"
+                                                    "$ref": "#/components/schemas/PatientResource"
                                                 },
                                                 "token": {
                                                     "type": "string",
@@ -2242,41 +2880,16 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The given data was invalid."
-                                        },
-                                        "errors": {
-                                            "type": "object",
-                                            "example": {
-                                                "email": [
-                                                    "The email has already been taken."
-                                                ]
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Registration failed",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
                                         "success": {
                                             "type": "boolean",
                                             "example": false
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Registration failed"
+                                            "example": "Validation failed"
                                         },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
+                                        "errors": {
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -2290,7 +2903,7 @@
         "/auth/patient/login": {
             "post": {
                 "tags": [
-                    "Patient"
+                    "🔐 Authentication"
                 ],
                 "summary": "Log in as a patient",
                 "description": "Login with email and password and receive authentication token",
@@ -2339,23 +2952,11 @@
                                         },
                                         "data": {
                                             "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                },
                                                 "patient": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "type": "integer",
-                                                            "example": 1
-                                                        },
-                                                        "name": {
-                                                            "type": "string",
-                                                            "example": "John Doe"
-                                                        },
-                                                        "email": {
-                                                            "type": "string",
-                                                            "format": "email",
-                                                            "example": "john.doe@example.com"
-                                                        }
-                                                    },
-                                                    "type": "object"
+                                                    "$ref": "#/components/schemas/PatientResource"
                                                 },
                                                 "token": {
                                                     "type": "string",
@@ -2382,35 +2983,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Wrong password"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Login failed",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Login failed"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
+                                            "example": "Invalid credentials"
                                         }
                                     },
                                     "type": "object"
@@ -2424,7 +2997,7 @@
         "/patient/logout": {
             "post": {
                 "tags": [
-                    "Patient"
+                    "👤 User Profile"
                 ],
                 "summary": "Log out a patient",
                 "description": "Revoke the current authentication token",
@@ -2443,204 +3016,6 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Logged out successfully"
-                                        },
-                                        "data": {
-                                            "type": "null",
-                                            "example": null
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Logout failed",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Logout failed"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/patient/profile": {
-            "put": {
-                "tags": [
-                    "Patient"
-                ],
-                "summary": "Update patient profile",
-                "description": "Update authenticated patient's profile information",
-                "operationId": "updatePatientProfile",
-                "requestBody": {
-                    "description": "Patient profile data",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "birth_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "1990-01-01"
-                                    },
-                                    "address": {
-                                        "type": "string",
-                                        "example": "123 Main St, City"
-                                    },
-                                    "phone_number": {
-                                        "type": "string",
-                                        "example": "+1234567890"
-                                    },
-                                    "medical_history": {
-                                        "type": "string",
-                                        "example": "No previous conditions"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Profile updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Profile updated successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "John Doe"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "format": "email",
-                                                    "example": "john.doe@example.com"
-                                                },
-                                                "birth_date": {
-                                                    "type": "string",
-                                                    "format": "date",
-                                                    "example": "1990-01-01"
-                                                },
-                                                "address": {
-                                                    "type": "string",
-                                                    "example": "123 Main St, City"
-                                                },
-                                                "phone_number": {
-                                                    "type": "string",
-                                                    "example": "+1234567890"
-                                                },
-                                                "medical_history": {
-                                                    "type": "string",
-                                                    "example": "No previous conditions"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Profile update failed",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Profile update failed"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
                                         }
                                     },
                                     "type": "object"
@@ -2659,14 +3034,14 @@
         "/patient/me": {
             "get": {
                 "tags": [
-                    "Patient"
+                    "👤 User Profile"
                 ],
                 "summary": "Get current patient profile",
-                "description": "Get authenticated patient's profile information",
-                "operationId": "getPatientProfile",
+                "description": "Get the authenticated patient's profile information",
+                "operationId": "getCurrentPatient",
                 "responses": {
                     "200": {
-                        "description": "User data retrieved successfully",
+                        "description": "Patient profile retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2677,39 +3052,122 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "User data retrieved successfully"
+                                            "example": "Patient profile retrieved successfully"
                                         },
                                         "data": {
                                             "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
                                                 },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "John Doe"
+                                                "patient": {
+                                                    "$ref": "#/components/schemas/PatientResource"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/patient/profile": {
+            "put": {
+                "tags": [
+                    "👤 User Profile"
+                ],
+                "summary": "Complete patient profile",
+                "description": "Complete or update the authenticated patient's profile information",
+                "operationId": "completePatientProfile",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "full_name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    },
+                                    "national_id": {
+                                        "type": "string",
+                                        "example": "1234567890123456"
+                                    },
+                                    "birth_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Main Street, City"
+                                    },
+                                    "blood_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "A",
+                                            "B",
+                                            "AB",
+                                            "O",
+                                            "A+",
+                                            "B+",
+                                            "AB+",
+                                            "O+",
+                                            "A-",
+                                            "B-",
+                                            "AB-",
+                                            "O-"
+                                        ],
+                                        "example": "O+"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile completed successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
                                                 },
-                                                "email": {
-                                                    "type": "string",
-                                                    "format": "email",
-                                                    "example": "john.doe@example.com"
-                                                },
-                                                "birth_date": {
-                                                    "type": "string",
-                                                    "format": "date",
-                                                    "example": "1990-01-01"
-                                                },
-                                                "address": {
-                                                    "type": "string",
-                                                    "example": "123 Main St, City"
-                                                },
-                                                "phone_number": {
-                                                    "type": "string",
-                                                    "example": "+1234567890"
-                                                },
-                                                "medical_history": {
-                                                    "type": "string",
-                                                    "example": "No previous conditions"
+                                                "patient": {
+                                                    "$ref": "#/components/schemas/PatientResource"
                                                 }
                                             },
                                             "type": "object"
@@ -2720,8 +3178,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "422": {
+                        "description": "Validation error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2732,35 +3190,10 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Unauthorized"
+                                            "example": "Validation failed"
                                         },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to fetch user data",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Failed to fetch user data"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Error message details"
+                                        "errors": {
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -2779,7 +3212,7 @@
         "/doctor/report": {
             "get": {
                 "tags": [
-                    "Reports"
+                    "👩‍⚕️ Doctor Services"
                 ],
                 "summary": "Create a new report for today",
                 "description": "Creates a new daily report for the authenticated doctor",
@@ -2807,7 +3240,7 @@
                                                             "type": "integer",
                                                             "example": 1
                                                         },
-                                                        "id_doctor": {
+                                                        "doctor_id": {
                                                             "type": "integer",
                                                             "example": 1
                                                         },
@@ -2852,6 +3285,26 @@
                             }
                         }
                     },
+                    "404": {
+                        "description": "Doctor profile not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Doctor profile not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Report generation failed",
                         "content": {
@@ -2864,7 +3317,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "failed to make consultation"
+                                            "example": "failed to make report"
                                         },
                                         "error": {
                                             "type": "string",
@@ -2887,7 +3340,7 @@
         "/doctor/reports": {
             "get": {
                 "tags": [
-                    "Reports"
+                    "👩‍⚕️ Doctor Services"
                 ],
                 "summary": "Get all doctor reports",
                 "description": "Retrieves all reports generated by the authenticated doctor",
@@ -2917,7 +3370,7 @@
                                                                 "type": "integer",
                                                                 "example": 1
                                                             },
-                                                            "id_doctor": {
+                                                            "doctor_id": {
                                                                 "type": "integer",
                                                                 "example": 1
                                                             },
@@ -2963,6 +3416,26 @@
                             }
                         }
                     },
+                    "404": {
+                        "description": "Doctor profile not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Doctor profile not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Failed to retrieve reports",
                         "content": {
@@ -2975,7 +3448,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "failed to make consultation"
+                                            "example": "failed to retrieve reports"
                                         },
                                         "error": {
                                             "type": "string",
@@ -2997,10 +3470,292 @@
         }
     },
     "components": {
+        "schemas": {
+            "UserResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "john@example.com"
+                    },
+                    "phone_number": {
+                        "type": "string",
+                        "example": "081234567890"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "admin",
+                            "doctor",
+                            "patient"
+                        ],
+                        "example": "patient"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    }
+                },
+                "type": "object"
+            },
+            "PatientResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "national_id": {
+                        "type": "string",
+                        "example": "1234567890123456"
+                    },
+                    "birth_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "1990-01-01"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "enum": [
+                            "male",
+                            "female"
+                        ],
+                        "example": "male"
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "123 Main Street"
+                    },
+                    "blood_type": {
+                        "type": "string",
+                        "example": "O+"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    }
+                },
+                "type": "object"
+            },
+            "DoctorResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "license_number": {
+                        "type": "string",
+                        "example": "STR123456789"
+                    },
+                    "specialization": {
+                        "type": "string",
+                        "example": "Cardiology"
+                    },
+                    "practice_schedule": {
+                        "type": "string",
+                        "example": "Monday-Friday 08:00-17:00"
+                    },
+                    "consultation_fee": {
+                        "type": "number",
+                        "example": 150000
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    }
+                },
+                "type": "object"
+            },
+            "DoctorApplicationResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "example": "Dr. John Smith"
+                    },
+                    "national_id": {
+                        "type": "string",
+                        "example": "1234567890123456"
+                    },
+                    "license_number": {
+                        "type": "string",
+                        "example": "STR123456789"
+                    },
+                    "specialization": {
+                        "type": "string",
+                        "example": "Cardiology"
+                    },
+                    "application_status": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "approved",
+                            "rejected"
+                        ],
+                        "example": "pending"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    }
+                },
+                "type": "object"
+            },
+            "RegistrationResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "patient_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "doctor_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "visit_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-01-15"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "confirmed",
+                            "completed",
+                            "cancelled"
+                        ],
+                        "example": "pending"
+                    },
+                    "complaint": {
+                        "type": "string",
+                        "example": "Chest pain"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    }
+                },
+                "type": "object"
+            },
+            "MedicalRecordResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "registration_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "diagnosis": {
+                        "type": "string",
+                        "example": "Hypertension Grade 1"
+                    },
+                    "treatment": {
+                        "type": "string",
+                        "example": "Lifestyle modification and medication"
+                    },
+                    "additional_notes": {
+                        "type": "string",
+                        "example": "Patient should monitor blood pressure daily"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    }
+                },
+                "type": "object"
+            },
+            "MedicineResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "medicine_name": {
+                        "type": "string",
+                        "example": "Amlodipine"
+                    },
+                    "medicine_type": {
+                        "type": "string",
+                        "example": "tablet"
+                    },
+                    "dosage": {
+                        "type": "string",
+                        "example": "5mg"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "example": "tablet"
+                    },
+                    "stock": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "datetime"
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
-                "description": "Enter token in format (Bearer <token>)",
                 "bearerFormat": "JWT",
                 "scheme": "bearer"
             }
@@ -3008,28 +3763,28 @@
     },
     "tags": [
         {
-            "name": "Admin",
-            "description": "API Endpoints for admin management"
+            "name": "🔐 Authentication",
+            "description": "User registration and login endpoints"
         },
         {
-            "name": "Consultations",
-            "description": "API Endpoints for managing consultations between patients and doctors"
+            "name": "⚙️ Admin Management",
+            "description": "Medicine inventory management for administrators"
         },
         {
-            "name": "Doctor",
-            "description": "API Endpoints for Doctor Management"
+            "name": "🏥 Patient Services",
+            "description": "Patient-specific functionalities (requires patient role)"
         },
         {
-            "name": "Patient",
-            "description": "API Endpoints for Patient Management"
+            "name": "👩‍⚕️ Doctor Services",
+            "description": "Report generation and management for doctors"
         },
         {
-            "name": "Reports",
-            "description": "API Endpoints for managing reports generated by doctors"
+            "name": "👤 User Profile",
+            "description": "Patient profile management"
         },
         {
-            "name": "Medical Records",
-            "description": "Medical Records"
+            "name": "📄 File Upload",
+            "description": "File upload services for doctor applications"
         }
     ]
 }
